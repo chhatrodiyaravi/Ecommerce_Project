@@ -1,0 +1,20 @@
+body {
+    background-color: #f8f9fa;
+}
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    transition: transform 0.2s ease;
+}
+.card:hover {
+    transform: translateY(-5px);
+}
+footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+
+
+

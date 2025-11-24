@@ -1,0 +1,34 @@
+<?php
+session_start();
+
+if (isset($_POST['product_id'], $_POST['product_name'], $_POST['product_price'])) {
+    $id = $_POST['product_id'];
+    $name = $_POST['product_name'];
+    $price = floatval($_POST['product_price']);
+    $qty = intval($_POST['product_qty']) ?: 1;
+
+    if (!isset($_SESSION['cart'])) {
+        $_SESSION['cart'] = [];
+    }
+
+    $found = false;
+    foreach ($_SESSION['cart'] as &$item) {
+        if ($item['id'] == $id) {
+            $item['qty'] += $qty; // update qty if already in cart
+            $found = true;
+            break;
+        }
+    }
+
+    if (!$found) {
+        $_SESSION['cart'][] = [
+            'id' => $id,
+            'name' => $name,
+            'price' => $price,
+            'qty' => $qty
+        ];
+    }
+}
+
+header("Location: cart.php");
+exit;
