@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         body {
             height: 100vh;
             /* background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d); */
-            background: #2a5298;
+            /* background: #2a5298; */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -95,7 +95,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
 <body>
     <div class="login-card">
-        <h2><i class="bi bi-camera-fill me-2"></i>Camera Store</h2>
+        <h2><i class="bi bi-camera-fill me-2"></i>SnapShot</h2>
         <?php if ($message) echo "<div class='alert alert-danger'>$message</div>"; ?>
         <form method="POST" id="loginForm">
             <div class="mb-3">

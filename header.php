@@ -37,10 +37,20 @@ if (session_status() === PHP_SESSION_NONE) {
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <!-- Centered Search Form -->
-                <form class="d-flex mx-auto" action="index.php" method="GET" style="width: 400px;">
-                    <input class="form-control me-2" type="text" name="search" placeholder="Search For Products,Brands and More" required>
+                <form id="searchForm" class="d-flex mx-auto align-items-start" action="index.php" method="GET" style="width: 400px;">
+
+                    <div class="w-100 me-2 position-relative">
+                        <input class="form-control" id="search" type="text" name="search"
+                            placeholder="Search For Products,Brands and More">
+
+                        <!-- Error will appear here -->
+                        <span id="search-error" class="text-danger small" style="position:absolute; left:0; top:40px;"></span>
+                    </div>
+
                     <button class="btn btn-outline-light" type="submit">Search</button>
                 </form>
+
+
 
                 <!-- Navigation Links (Right Aligned) -->
                 <ul class="navbar-nav ms-auto">
@@ -69,6 +79,35 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
     </nav>
+
+
+
+    <script>
+        $(document).ready(function() {
+
+            $("#searchForm").validate({
+                rules: {
+                    search: {
+                        required: true,
+                        minlength: 2
+                    }
+                },
+                messages: {
+                    search: {
+                        required: "Please enter a search",
+                        minlength: "Type at least 2 characters"
+                    }
+                },
+                errorElement: "span",
+                errorClass: "text-danger small", // smaller text for navbar
+                errorPlacement: function(error, element) {
+                    error.insertAfter(element);
+                }
+            });
+
+        });
+    </script>
+
 
 
 
