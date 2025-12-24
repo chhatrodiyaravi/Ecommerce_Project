@@ -1,4 +1,3 @@
-<!-- config.php content goes here -->
 <?php
 // Database Configuration
 $host = "localhost";       // Server host (default for XAMPP)
@@ -20,4 +19,3 @@ $conn->set_charset("utf8");
 // Optional: Turn off error display in production (for college, keep it ON)
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-?>

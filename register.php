@@ -17,28 +17,58 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } elseif (strlen($password_plain) < 6) {
         $message = "❌ Password must be at least 6 characters.";
     } else {
-        // Escape + hash
-        $username = mysqli_real_escape_string($conn, $username);
-        $email = mysqli_real_escape_string($conn, $email);
+        // Hash password
         $password = password_hash($password_plain, PASSWORD_DEFAULT);
 
-        // 1️⃣ Check if username exists
-        $check_username = mysqli_query($conn, "SELECT id FROM users WHERE username='$username'");
-        if (mysqli_num_rows($check_username) > 0) {
-            $message = "⚠️ Username already Exist. Please choose another.";
-        } else {
-            // 2️⃣ Check if email exists
-            $check_email = mysqli_query($conn, "SELECT id FROM users WHERE email='$email'");
-            if (mysqli_num_rows($check_email) > 0) {
+        // Ensure DB connection is alive, try reconnect if needed
+        if (!isset($conn) || (isset($conn) && !$conn->ping())) {
+            try {
+                $conn = new mysqli($host, $user, $pass, $dbname);
+            } catch (Exception $e) {
+                $message = "❌ Database Connection Error: " . $e->getMessage();
+            }
+            if (isset($conn) && $conn->connect_error) {
+                $message = "❌ Database Connection Failed: " . $conn->connect_error;
+            }
+        }
+
+        if (empty($message)) {
+            // 1️⃣ Check if username exists (prepared)
+            $stmt = $conn->prepare("SELECT id FROM users WHERE username = ? LIMIT 1");
+            $stmt->bind_param('s', $username);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
+                $message = "⚠️ Username already Exist. Please choose another.";
+            }
+            $stmt->close();
+        }
+
+        if (empty($message)) {
+            // 2️⃣ Check if email exists (prepared)
+            $stmt = $conn->prepare("SELECT id FROM users WHERE email = ? LIMIT 1");
+            $stmt->bind_param('s', $email);
+            $stmt->execute();
+            $stmt->store_result();
+            if ($stmt->num_rows > 0) {
                 $message = "⚠️ Email already registered. <a href='login.php'>Login here</a>";
-            } else {
-                // 3️⃣ Insert new record
-                $sql = "INSERT INTO users (username, email, password) VALUES ('$username','$email','$password')";
-                if (mysqli_query($conn, $sql)) {
+            }
+            $stmt->close();
+        }
+
+        if (empty($message)) {
+            // 3️⃣ Insert new record using prepared statement
+            $stmt = $conn->prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+            if ($stmt) {
+                $stmt->bind_param('sss', $username, $email, $password);
+                if ($stmt->execute()) {
                     $message = "✅ Registration successful! <a href='login.php'>Login here</a>";
                 } else {
-                    $message = "❌ Database Error: " . mysqli_error($conn);
+                    $message = "❌ Database Error: " . $stmt->error;
                 }
+                $stmt->close();
+            } else {
+                $message = "❌ Database Error: " . $conn->error;
             }
         }
     }

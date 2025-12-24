@@ -58,9 +58,41 @@ if (session_status() === PHP_SESSION_NONE) {
                     <li class="nav-item"><a class="nav-link" href="about.php">About Us</a></li>
                     <li class="nav-item"><a class="nav-link" href="contact.php">Contact</a></li>
 
-                    <?php if (isset($_SESSION['username'])): ?>
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <?php
+                        // Default display name
+                        $displayName = $_SESSION['username'] ?? '';
+                        // Prefer session-stored avatar (set after upload) to avoid timing issues
+                        $avatarSrc = $_SESSION['profile_photo'] ?? '';
+                        // Try to get profile photo and username from DB if not available in session
+                        if (empty($avatarSrc)) {
+                            if (!isset($conn)) {
+                                @include_once 'config.php';
+                            }
+                            if (isset($conn)) {
+                                $stmt = $conn->prepare("SELECT profile_photo, username FROM users WHERE id = ? LIMIT 1");
+                                $stmt->bind_param('i', $_SESSION['user_id']);
+                                if ($stmt->execute()) {
+                                    $res = $stmt->get_result();
+                                    if ($res && $res->num_rows > 0) {
+                                        $row = $res->fetch_assoc();
+                                        if (!empty($row['profile_photo'])) $avatarSrc = $row['profile_photo'];
+                                        if (!empty($row['username'])) $displayName = $row['username'];
+                                    }
+                                }
+                                $stmt->close();
+                            }
+                        }
+                        ?>
                         <li class="nav-item">
-                            <span class="nav-link">Welcome, <b><?php echo $_SESSION['username']; ?></b></span>
+                            <a class="nav-link d-flex align-items-center" href="profile.php" title="View Profile">
+                                <span class="me-2" style="color:inherit; font-weight:500"><?php echo htmlspecialchars($displayName); ?></span>
+                                <?php if (!empty($avatarSrc)): ?>
+                                    <img src="<?php echo htmlspecialchars($avatarSrc); ?>" alt="avatar" style="width:34px;height:34px;object-fit:cover;border-radius:50%;">
+                                <?php else: ?>
+                                    <i class="bi bi-person-circle" style="font-size:1.6rem;color:#fff"></i>
+                                <?php endif; ?>
+                            </a>
                         </li>
                         <li class="nav-item"><a class="nav-link" href="logout.php">Logout</a></li>
                     <?php else: ?>
@@ -107,10 +139,3 @@ if (session_status() === PHP_SESSION_NONE) {
 
         });
     </script>
-
-
-
-
-</body>
-
-</html>
