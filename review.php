@@ -56,73 +56,13 @@ $result = mysqli_stmt_get_result($stmt);
                 </div>
                 <h5 class="text-center mb-3"><?= htmlspecialchars($row['name']) ?></h5>
 
-                <form method="POST" action="save_review.php" class="reviewForm">
-                    <input type="hidden" name="product_id" value="<?= htmlspecialchars($row['product_id']) ?>">
-                    <input type="hidden" name="order_id" value="<?= htmlspecialchars($order_id) ?>">
-
-                    <div class="mb-3">
-                        <label for="rating<?= $row['product_id'] ?>" class="form-label">Rating:</label>
-                        <select id="rating<?= $row['product_id'] ?>" name="rating" class="form-select" required>
-                            <option value="">Select</option>
-                            <option value="1">⭐</option>
-                            <option value="2">⭐⭐</option>
-                            <option value="3">⭐⭐⭐</option>
-                            <option value="4">⭐⭐⭐⭐</option>
-                            <option value="5">⭐⭐⭐⭐⭐</option>
-                        </select>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="review<?= $row['product_id'] ?>" class="form-label">Review:</label>
-                        <textarea id="review<?= $row['product_id'] ?>" name="review_text" class="form-control" rows="3" required></textarea>
-                    </div>
-
-                    <button type="submit" class="btn btn-primary w-100">Submit Review</button>
-                </form>
+                <div class="mb-3 text-center text-muted">Review submission has been disabled for this order.</div>
             </div>
         <?php endwhile; ?>
 
     </div>
 
-    <!-- jQuery + jQuery Validation (Load First) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            // Apply validation to each review form
-            $(".reviewForm").each(function() {
-                $(this).validate({
-                    rules: {
-                        rating: {
-                            required: true
-                        },
-                        review_text: {
-                            required: true,
-                            minlength: 10
-                        }
-                    },
-                    messages: {
-                        rating: {
-                            required: "Please select a rating"
-                        },
-                        review_text: {
-                            required: "Please write a review",
-                            minlength: "Review must be at least 10 characters long"
-                        }
-                    },
-                    errorClass: "text-danger",
-                    errorElement: "div",
-                    highlight: function(element) {
-                        $(element).addClass("is-invalid");
-                    },
-                    unhighlight: function(element) {
-                        $(element).removeClass("is-invalid");
-                    }
-                });
-            });
-        });
-    </script>
+    <!-- Review submission disabled: client-side validation removed -->
 
     <!-- Bootstrap 5 JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,4 +1,5 @@
 <?php
+
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -11,6 +12,8 @@ date_default_timezone_set('Asia/Kolkata');
 
 if (isset($_POST['email'])) {
     $email = $_POST['email'];
+    // reset any previous OTP verification flag
+    unset($_SESSION['otp_verified']);
     $_SESSION['email'] = $email;
 
 
@@ -52,6 +55,8 @@ if (isset($_POST['email'])) {
 
             $mail->send();
 
+            // ensure otp_verified is cleared when a new OTP is sent
+            unset($_SESSION['otp_verified']);
             $_SESSION['email'] = $email;
             echo "<script>alert('OTP sent successfully to your email!');window.location='verify_otp.php';</script>";
         } catch (Exception $e) {
@@ -61,4 +66,3 @@ if (isset($_POST['email'])) {
         echo "<script>alert('Email not found!');window.location='forgot_password.php';</script>";
     }
 }
-?>

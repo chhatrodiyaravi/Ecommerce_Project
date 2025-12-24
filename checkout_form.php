@@ -1,182 +1,131 @@
-<!-- order_success.php content goes here -->
 <?php
 session_start();
+include 'header.php';
 
-// Calculate total from cart
-$total = 0;
-if (!empty($_SESSION['cart'])) {
-    foreach ($_SESSION['cart'] as $item) {
-        $total += $item['price'] * $item['qty'];
-    }
+// Build cart summary
+$cart = $_SESSION['cart'] ?? [];
+$subtotal = 0.0;
+foreach ($cart as $item) {
+    $subtotal += ($item['price'] ?? 0) * ($item['qty'] ?? 1);
 }
+
+// Simple shipping and tax rules (adjust as needed)
+$shipping = $subtotal > 0 ? 50.00 : 0.00;
+$tax = round($subtotal * 0.05, 2); // 5% tax
+$total = round($subtotal + $shipping + $tax, 2);
 ?>
-<!DOCTYPE html>
-<html>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Checkout</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f8f9fa;
-        }
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Shipping & Billing</h5>
+                    <form id="checkoutForm" action="checkout.php" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="customer_name" id="customer_name" class="form-control" required>
+                        </div>
 
-        .checkout-container {
-            width: 400px;
-            margin: 50px auto;
-            background: white;
-            padding: 20px;
-            box-shadow: 0px 0px 10px #ccc;
-            border-radius: 8px;
-        }
+                        <div class="mb-3">
+                            <label class="form-label">Phone</label>
+                            <input type="text" name="phone" id="phone" class="form-control" required>
+                        </div>
 
-        h2 {
-            text-align: center;
-            color: #333;
-        }
+                        <div class="mb-3">
+                            <label class="form-label">Full Address</label>
+                            <textarea name="address" id="address" class="form-control" rows="3" required></textarea>
+                        </div>
 
-        input,
-        textarea,
-        select,
-        button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <select name="payment_method" id="payment_method" class="form-select" required>
+                                <option value="">Choose...</option>
+                                <option value="COD">Cash on Delivery</option>
+                                <option value="Online">Online Payment</option>
+                            </select>
+                        </div>
 
-        button {
-            background: #28a745;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            border: none;
-        }
+                        <input type="hidden" name="total_amount" value="<?php echo htmlspecialchars($total); ?>">
+                        <button class="btn btn-primary">Place Order</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-        button:hover {
-            background: #218838;
-        }
-
-        .total {
-            font-weight: bold;
-            margin: 10px 0;
-            text-align: right;
-        }
-
-        /* error messages */
-        .text-danger {
-            font-size: 0.85rem;
-            color: #dc3545 !important;
-            /* force red */
-            margin-top: 5px;
-            display: block;
-            /* ensures line below input */
-        }
-
-        /* highlight invalid fields */
-        .is-invalid {
-            border-color: #dc3545 !important;
-            /* red border */
-            box-shadow: none !important;
-        }
-
-        /* optional: valid fields */
-        .is-valid {
-            border-color: #28a745 !important;
-        }
-    </style>
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- jQuery Validation Plugin -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
-
-</head>
-
-<body>
-
-    <div class="checkout-container">
-        <h2>Checkout</h2>
-        <p class="total">Total Amount: ₹<?php echo number_format($total, 2); ?></p>
-
-        <form action="checkout.php" method="POST" id="checkoutForm">
-            <input type="text" name="customer_name" id="customer_name" placeholder="Full Name">
-            <input type="text" name="phone" id="phone" placeholder="Phone">
-            <textarea name="address" id="address" placeholder="Full Address"></textarea>
-
-            <input type="hidden" name="total_amount" value="<?php echo $total; ?>">
-
-            <select name="payment_method" id="payment_method">
-                <option value="">Select Payment Method</option>
-                <option value="COD">Cash on Delivery</option>
-                <option value="Online">Online Payment</option>
-            </select>
-
-            <button type="submit">Place Order</button>
-        </form>
-
+        <div class="col-md-6">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">Order Summary</h5>
+                    <?php if (empty($cart)): ?>
+                        <div class="alert alert-warning">Your cart is empty.</div>
+                    <?php else: ?>
+                        <ul class="list-group mb-3">
+                            <?php foreach ($cart as $item): ?>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <div><strong><?php echo htmlspecialchars($item['name'] ?? $item['product_name'] ?? 'Product'); ?></strong></div>
+                                        <small class="text-muted">Qty: <?php echo (int)($item['qty'] ?? 1); ?></small>
+                                    </div>
+                                    <span>₹<?php echo number_format((($item['price'] ?? 0) * ($item['qty'] ?? 1)), 2); ?></span>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <div class="d-flex justify-content-between">
+                            <div>Subtotal</div>
+                            <div>₹<?php echo number_format($subtotal, 2); ?></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <div>Shipping</div>
+                            <div>₹<?php echo number_format($shipping, 2); ?></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <div>Tax (5%)</div>
+                            <div>₹<?php echo number_format($tax, 2); ?></div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <div>Total</div>
+                            <div>₹<?php echo number_format($total, 2); ?></div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script>
-        $(document).ready(function() {
-            $("#checkoutForm").validate({
-                rules: {
-                    customer_name: {
-                        required: true,
-                        minlength: 3
-                    },
-                    phone: {
-                        required: true,
-                        digits: true,
-                        minlength: 10,
-                        maxlength: 10
-                    },
-                    address: {
-                        required: true,
-                        minlength: 10
-                    },
-                    payment_method: {
-                        required: true
-                    }
+<!-- client-side validation -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+<script>
+    $(function() {
+        $('#checkoutForm').validate({
+            rules: {
+                customer_name: {
+                    required: true,
+                    minlength: 3
                 },
-                messages: {
-                    customer_name: {
-                        required: " Please enter your full name",
-                        minlength: "Name must be at least 3 characters long"
-                    },
-                    phone: {
-                        required: " Please enter your phone number",
-                        digits: "Only numbers allowed",
-                        minlength: "Phone must be 10 digits",
-                        maxlength: "Phone must be 10 digits"
-                    },
-                    address: {
-                        required: " Please enter your address",
-                        minlength: "Address should be at least 10 characters long"
-                    },
-                    payment_method: {
-                        required: " Please select a payment method"
-                    }
+                phone: {
+                    required: true,
+                    digits: true,
+                    minlength: 10
                 },
-                errorElement: "div",
-                errorClass: "text-danger",
-                // place the error after the element
-                errorPlacement: function(error, element) {
-                    error.insertAfter(element);
+                address: {
+                    required: true,
+                    minlength: 10
                 },
-                highlight: function(element) {
-                    $(element).addClass("is-invalid").removeClass("is-valid");
-                },
-                unhighlight: function(element) {
-                    $(element).removeClass("is-invalid").addClass("is-valid");
+                payment_method: {
+                    required: true
                 }
-            });
+            },
+            errorClass: 'text-danger',
+            errorElement: 'div',
+            errorPlacement: function(err, el) {
+                err.insertAfter(el);
+            }
         });
-    </script>
+    });
+</script>
 
-
-
-</body>
-
-</html>
+<?php include 'footer.php'; ?>
