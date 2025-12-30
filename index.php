@@ -11,7 +11,6 @@ if (!empty($_GET['search'])) {
     // Match company name OR product name
     $where .= " AND (company LIKE '%$search%' OR name LIKE '%$search%')";
 }
-
 // Fetch products
 $sql = "SELECT * FROM products WHERE $where";
 $result = $conn->query($sql);
@@ -20,7 +19,6 @@ include 'header.php';
 <!-- css -->
 <link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 
 
 

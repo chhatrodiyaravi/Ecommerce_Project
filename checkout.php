@@ -12,6 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+// Prevent checkout when cart is empty
+if (empty($_SESSION['cart'])) {
+    header('Location: checkout_form.php?error=empty_cart');
+    exit;
+}
+
 $customer_name = trim($_POST['customer_name'] ?? '');
 $phone = trim($_POST['phone'] ?? '');
 $address = trim($_POST['address'] ?? '');

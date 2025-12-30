@@ -295,10 +295,19 @@ include 'header.php'; // your header nav (shows cart count)
 
                             <a href="?clear=1" class="btn btn-outline-warning" id="clearCartBtn">Clear Cart</a>
 
-                            <form action="checkout.php" method="POST">
-                                <input type="hidden" name="total_amount" value="<?= $grandTotal ?? 0 ?>">
-                                <button type="submit" class="btn btn-success">Proceed to Checkout</button>
-                            </form>
+                            <?php if (!empty($_SESSION['cart'])): ?>
+                                <form action="checkout.php" method="POST">
+                                    <input type="hidden" name="total_amount" value="<?= $grandTotal ?? 0 ?>">
+                                    <button type="submit" class="btn btn-success">Proceed to Checkout</button>
+                                </form>
+                            <?php else: ?>
+                                <button type="button" id="proceedEmptyBtn" class="btn btn-success">Proceed to Checkout</button>
+                                <script>
+                                    document.getElementById('proceedEmptyBtn')?.addEventListener('click', function() {
+                                        alert('Your cart is empty. Add items before proceeding to checkout.');
+                                    });
+                                </script>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
